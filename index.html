@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#FFE8D6">
+<title>🏡 우리가족 할일</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/pretendard/1.3.9/variable/pretendardvariable.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --dad: #5B8FB9; --mom: #E8A0BF; --c1: #B983FF; --c2: #94B49F;
+  --bg1: #FFF8F0; --bg2: #FFF3E6; --card: #ffffff;
+  --text1: #4a3f35; --text2: #6b5e50; --text3: #8a7e72; --text4: #a89888; --text5: #bbb;
+  --border: #f0e6d8; --accent: #e8845c; --accent2: #FFB088; --accent-bg: #FFF3E0;
+  --success: #94d2a5; --danger: #FF6B6B;
+  --shadow: 0 2px 12px rgba(0,0,0,0.04);
+  --radius: 16px; --radius-sm: 12px; --radius-xs: 8px;
+  --safe-bottom: env(safe-area-inset-bottom, 8px);
+  --tab-h: 62px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body {
+  font-family: 'Pretendard Variable', 'Pretendard', -apple-system, 'Apple SD Gothic Neo', sans-serif;
+  background: linear-gradient(180deg, var(--bg1), var(--bg2));
+  color: var(--text1);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+#app {
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+/* ===== USER BAR ===== */
+.user-bar {
+  display:flex; background:var(--card); border-bottom:1px solid var(--border);
+  position:sticky; top:0; z-index:20;
+}
+.user-bar button {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:10px 4px 8px; border:none; background:transparent; cursor:pointer;
+  border-bottom:3px solid transparent; transition:all .2s;
+  font-family:inherit;
+}
+.user-bar button.active { border-bottom-color: var(--accent); background: var(--accent-bg); }
+.user-bar button .ub-emoji { font-size:22px; }
+.user-bar button .ub-name { font-size:11px; font-weight:500; color:var(--text4); }
+.user-bar button.active .ub-name { font-weight:700; color:var(--accent); }
+
+/* ===== CONTENT ===== */
+.content { flex:1; padding:14px 16px calc(var(--tab-h) + var(--safe-bottom) + 10px); }
+
+/* ===== TAB BAR ===== */
+.tab-bar {
+  position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:520px;
+  display:flex; background:var(--card); border-top:1px solid var(--border);
+  padding:6px 0 var(--safe-bottom);
+  box-shadow:0 -2px 12px rgba(0,0,0,0.04); z-index:20;
+}
+.tab-bar button {
+  flex:1; display:flex; flex-direction:column; align-items:center; gap:2px;
+  padding:6px 0; border:none; background:transparent; cursor:pointer;
+  color:var(--text4); transition:color .2s; font-family:inherit;
+}
+.tab-bar button.active { color:var(--accent); }
+.tab-bar button .tb-icon { font-size:22px; }
+.tab-bar button .tb-label { font-size:10px; font-weight:500; }
+.tab-bar button.active .tb-label { font-weight:700; }
+
+/* ===== SHARED COMPONENTS ===== */
+.card {
+  background:var(--card); border-radius:var(--radius); padding:16px;
+  margin-bottom:12px; box-shadow:var(--shadow);
+}
+.card-title { font-size:14px; font-weight:700; color:var(--text2); margin-bottom:10px; }
+
+.btn-add {
+  width:100%; padding:12px; background:var(--card);
+  border:2px dashed #e8c8a8; border-radius:var(--radius);
+  font-size:14px; font-weight:600; color:#c49070;
+  cursor:pointer; margin-bottom:12px; font-family:inherit;
+}
+.btn-submit {
+  width:100%; padding:11px; border:none; border-radius:14px;
+  font-size:14px; font-weight:700; color:#fff; cursor:pointer;
+  background:linear-gradient(135deg, var(--accent2), var(--accent));
+  box-shadow:0 4px 12px rgba(255,140,90,0.3);
+  margin-top:12px; font-family:inherit;
+}
+.btn-submit:disabled { opacity:.4; }
+.btn-back {
+  background:none; border:none; color:#a08060;
+  font-size:13px; font-weight:600; cursor:pointer;
+  padding:4px 0; margin-bottom:8px; font-family:inherit;
+}
+.pg-title { font-size:18px; font-weight:800; color:var(--text1); margin:0 0 16px; }
+
+input[type="text"], input[type="date"], input[type="time"], input[type="number"], textarea, select {
+  width:100%; padding:10px 12px; border:2px solid var(--border);
+  border-radius:var(--radius-sm); font-size:14px; outline:none;
+  background:#FFFBF7; font-family:inherit; color:var(--text1);
+}
+textarea { resize:vertical; }
+
+.form-label { font-size:12px; font-weight:600; color:var(--text3); margin-bottom:4px; display:block; }
+.form-row { margin-top:10px; }
+
+.chip-row { display:flex; flex-wrap:wrap; gap:5px; }
+.chip {
+  padding:5px 10px; border-radius:16px; border:none;
+  font-size:12px; cursor:pointer; font-weight:500;
+  background:#f0ebe3; color:var(--text2);
+  transition:all .15s; font-family:inherit;
+}
+.chip.active { color:#fff; }
+
+.filter-chip {
+  padding:6px 12px; border-radius:20px; border:none;
+  font-size:12px; cursor:pointer; font-weight:600; font-family:inherit;
+}
+
+.tag {
+  font-size:10px; padding:2px 6px; border-radius:6px; font-weight:500;
+  display:inline-block; white-space:nowrap;
+}
+
+.todo-row {
+  display:flex; align-items:center; gap:8px;
+  background:var(--card); border-radius:14px; padding:10px 12px;
+  margin-bottom:6px; box-shadow:0 1px 4px rgba(0,0,0,0.03);
+  transition:opacity .3s; border-left:3px solid transparent;
+}
+.todo-row.poked { border-left-color:var(--danger); }
+.todo-row.done { opacity:.5; }
+
+.check-btn {
+  width:26px; height:26px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; font-weight:700; color:#fff;
+  cursor:pointer; flex-shrink:0;
+  background:#f0ebe3; border:2px solid #d4c8ba;
+}
+.check-btn.checked { background:var(--success); border:none; }
+
+.act-btn {
+  background:none; border:none; font-size:16px;
+  cursor:pointer; padding:2px; color:var(--text2);
+}
+
+.empty { text-align:center; padding:40px 16px; }
+.empty-icon { font-size:48px; }
+.empty-text { color:var(--text4); margin-top:8px; font-size:14px; line-height:1.6; }
+
+.date-header {
+  font-size:13px; font-weight:700; color:#a08060;
+  padding:10px 4px 4px; border-bottom:1px solid var(--border);
+  margin-bottom:6px;
+}
+
+.dday-badge {
+  background:linear-gradient(135deg, #FF8C5A, #FFB088);
+  color:#fff; font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:8px; white-space:nowrap;
+}
+
+/* ===== OVERLAY / MODAL ===== */
+.overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.4);
+  display:flex; align-items:center; justify-content:center;
+  z-index:100; padding:20px;
+}
+.modal {
+  background:var(--card); border-radius:24px; padding:24px;
+  max-width:360px; width:100%; max-height:80vh; overflow-y:auto;
+}
+
+/* ===== HOME ===== */
+.status-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.status-chip {
+  display:flex; gap:4px; align-items:center;
+  padding:6px 10px; border-radius:12px;
+  border:2px solid; background:#fff; font-size:13px;
+}
+.progress-bar {
+  flex:1; height:10px; border-radius:5px;
+  background:#fff3e0; overflow:hidden;
+}
+.progress-fill {
+  height:100%; border-radius:5px;
+  background:linear-gradient(90deg, var(--accent2), var(--accent));
+  transition:width .5s ease;
+}
+
+/* ===== CALENDAR ===== */
+.cal-nav { display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:8px; }
+.cal-nav button { background:none; border:none; font-size:16px; color:#a08060; cursor:pointer; padding:4px 8px; }
+.cal-nav span { font-size:17px; font-weight:700; color:#5a4a3a; }
+.cal-week { display:grid; grid-template-columns:repeat(7,1fr); text-align:center; margin-bottom:2px; }
+.cal-week div { font-size:11px; font-weight:600; padding:4px 0; color:var(--text3); }
+.cal-week div:first-child { color:#e88; }
+.cal-week div:last-child { color:#68b; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.cal-cell {
+  aspect-ratio:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  border-radius:10px; cursor:pointer;
+  border:2px solid transparent; transition:all .15s;
+  padding:1px;
+}
+.cal-cell.today { background:var(--accent-bg); }
+.cal-cell.today .cal-day { font-weight:700; color:var(--accent); }
+.cal-cell.selected { border-color:#e8a87c; background:#FFF8F0; }
+.cal-day { font-size:12px; color:var(--text2); }
+.cal-dots { display:flex; gap:1px; margin-top:1px; }
+.cal-dot { width:5px; height:5px; border-radius:3px; }
+
+/* ===== EVENT STRIP ===== */
+.event-strip {
+  display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:6px;
+  scrollbar-width:none; -ms-overflow-style:none;
+}
+.event-strip::-webkit-scrollbar { display:none; }
+.event-chip {
+  flex-shrink:0; background:var(--card); border-radius:12px;
+  padding:8px 12px; box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+
+/* ===== QUEST ===== */
+.char-card {
+  text-align:center; border-radius:var(--radius); padding:20px;
+  margin-bottom:12px; box-shadow:var(--shadow);
+}
+.exp-bar { height:10px; border-radius:5px; background:#f0ebe3; overflow:hidden; margin:0 auto; width:80%; }
+.exp-fill { height:100%; border-radius:5px; transition:width .5s; }
+.point-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.point-box { text-align:center; padding:12px; border-radius:14px; }
+.big-btn {
+  background:var(--card); border-radius:18px; padding:20px;
+  border:none; box-shadow:var(--shadow); cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  font-family:inherit; width:100%;
+}
+
+/* ===== ROULETTE ===== */
+.roulette-wrap { display:flex; justify-content:center; margin-bottom:24px; }
+.roulette-outer { position:relative; width:200px; height:200px; }
+.roulette-arrow { position:absolute; top:-14px; left:50%; transform:translateX(-50%); font-size:22px; z-index:2; }
+.roulette-wheel {
+  width:200px; height:200px; border-radius:50%;
+  border:4px solid #FFE8D6;
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr;
+  overflow:hidden; transition:transform 3s cubic-bezier(0.17,0.67,0.12,0.99);
+}
+.roulette-cell { display:flex; align-items:center; justify-content:center; font-size:32px; }
+
+/* ===== SHOP ===== */
+.shop-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.shop-card { text-align:center; padding:14px; }
+.shop-emoji { font-size:36px; }
+.shop-name { font-size:13px; font-weight:600; color:var(--text1); margin:6px 0; }
+
+/* ===== FEED ===== */
+.feed-card {
+  background:var(--card); border-radius:var(--radius); padding:12px;
+  margin-bottom:8px; box-shadow:0 1px 6px rgba(0,0,0,0.03);
+}
+.reaction-row { display:flex; gap:4px; margin-top:8px; flex-wrap:wrap; align-items:center; }
+.reaction-btn {
+  border:none; border-radius:16px; padding:4px 8px;
+  font-size:14px; cursor:pointer; background:#f5f0ea;
+  display:flex; align-items:center; gap:2px; font-family:inherit;
+}
+.reaction-btn.active { background:#FFE8D6; font-weight:700; }
+.comment-list { margin-top:6px; padding-left:8px; border-left:2px solid var(--border); }
+.comment-item { font-size:12px; color:var(--text2); padding:2px 0; }
+
+/* ===== GAME ===== */
+.game-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:6px;
+  max-width:240px; margin:16px auto;
+}
+.game-cell {
+  aspect-ratio:1; border-radius:14px; border:2px solid var(--border);
+  background:var(--card); font-size:32px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  font-family:inherit; transition:background .15s;
+}
+.game-cell.filled { background:#FFF8F0; }
+
+/* ===== RESPONSIVE ===== */
+@media (min-width:521px) {
+  .content { padding-left:24px; padding-right:24px; }
+  .card { padding:20px; }
+  .todo-row { padding:12px 16px; }
+  .point-grid { gap:14px; }
+  .shop-grid { gap:14px; }
+}
+@media (max-width:360px) {
+  .user-bar button { padding:8px 2px 6px; }
+  .user-bar button .ub-emoji { font-size:18px; }
+  .user-bar button .ub-name { font-size:9px; }
+  .tab-bar button .tb-icon { font-size:18px; }
+  .tab-bar button .tb-label { font-size:9px; }
+  .chip { font-size:11px; padding:4px 8px; }
+}
+
+/* ===== HIDE SCROLLBAR ===== */
+.content::-webkit-scrollbar { width:0; }
+.content { scrollbar-width:none; }
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation:fadeIn .25s ease; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="user-bar" id="userBar"></div>
+  <div class="content" id="contentArea"></div>
+  <div class="tab-bar" id="tabBar"></div>
+</div>
+<div class="overlay" id="overlay" style="display:none" onclick="closeModal()">
+  <div class="modal" id="modalContent" onclick="event.stopPropagation()"></div>
+</div>
+
+<script>
+/* ===== DATA ===== */
+const FM = [
+  {id:"dad",name:"아빠",emoji:"👨",color:"#5B8FB9",role:"parent"},
+  {id:"mom",name:"엄마",emoji:"👩",color:"#E8A0BF",role:"parent"},
+  {id:"child1",name:"첫째",emoji:"👧",color:"#B983FF",role:"middle"},
+  {id:"child2",name:"둘째",emoji:"🧒",color:"#94B49F",role:"elementary"},
+];
+const CATS = [
+  {id:"house",name:"집안일",emoji:"🏠",color:"#FFD6A5"},
+  {id:"grocery",name:"장보기",emoji:"🛒",color:"#CAFFBF"},
+  {id:"cook",name:"요리",emoji:"🍳",color:"#FFB5B5"},
+  {id:"study",name:"공부",emoji:"📚",color:"#BDB2FF"},
+  {id:"errand",name:"외출/셔틀",emoji:"🚗",color:"#A0C4FF"},
+  {id:"prep",name:"준비물",emoji:"🎒",color:"#FFC6FF"},
+  {id:"etc",name:"기타",emoji:"✨",color:"#FFFFB5"},
+];
+const STATUSES=["😊 여유있음","📱 연락가능","🏃 외출중","🚗 운전중","📖 시험기간","💼 야근중","😴 취침중"];
+const PRESETS=[
+  {text:"쓰레기 버리기",points:10,cat:"house"},{text:"빨래바구니에 넣기",points:20,cat:"house"},
+  {text:"분리수거",points:30,cat:"house"},{text:"신발 정돈",points:10,cat:"house"},
+  {text:"설거지",points:25,cat:"house"},{text:"청소기 돌리기",points:30,cat:"house"},
+  {text:"베란다 청소",points:35,cat:"house"},{text:"화장실 청소",points:40,cat:"house"},
+  {text:"택배 박스 정리",points:15,cat:"house"},
+];
+const QUEST_NAMES={house:"🐉 먼지 몬스터 소탕",grocery:"📦 식량 보급 미션",cook:"🧙 요리 마법사 도전",study:"📖 지식의 던전 탐험",errand:"🗺️ 용사의 외출 퀘스트",prep:"🛡️ 장비 점검 미션",etc:"🔮 비밀 임무 수행"};
+const SHOP=[
+  {id:"s1",name:"간식 선택권",cost:50,emoji:"🍪"},{id:"s2",name:"TV 리모컨 30분권",cost:80,emoji:"📺"},
+  {id:"s3",name:"자유 시간 1시간권",cost:100,emoji:"⏰"},{id:"s4",name:"주말 외식 메뉴 결정권",cost:150,emoji:"🍽️"},
+  {id:"s5",name:"용돈 1000원 쿠폰",cost:200,emoji:"💰"},{id:"s6",name:"소원권 1장",cost:500,emoji:"🌟"},
+  {id:"s7",name:"가족 특별 이벤트",cost:1000,emoji:"🎉"},
+];
+const REACTS=["👍","❤️","🔥","👏","😍","💪"];
+const TABS=[{icon:"🏠",label:"홈"},{icon:"📋",label:"할일"},{icon:"📅",label:"캘린더"},{icon:"⚔️",label:"퀘스트"},{icon:"💬",label:"소통"}];
+
+/* ===== UTIL ===== */
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const getToday=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
+const fmtDate=(s)=>{if(!s)return'';const d=new Date(s+'T00:00:00');const w=["일","월","화","수","목","금","토"];return `${d.getMonth()+1}/${d.getDate()}(${w[d.getDay()]})`;};
+const ddayCalc=(s)=>{const diff=Math.ceil((new Date(s+'T00:00:00')-new Date(getToday()+'T00:00:00'))/86400000);return diff===0?'D-Day!':diff>0?`D-${diff}`:`D+${Math.abs(diff)}`;};
+const gM=(id)=>FM.find(m=>m.id===id)||FM[0];
+const gC=(id)=>CATS.find(c=>c.id===id)||CATS[0];
+const esc=(s)=>(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ===== STATE ===== */
+let S = {
+  todos:[],events:[],feed:[],groceries:[],
+  points:{dad:0,mom:0,child1:0,child2:0},
+  characters:{dad:{level:1,exp:0,items:["🏠"]},mom:{level:1,exp:0,items:["🏠"]},child1:{level:1,exp:0,items:["🏠"]},child2:{level:1,exp:0,items:["🏠"]}},
+  statuses:{dad:"😊 여유있음",mom:"😊 여유있음",child1:"😊 여유있음",child2:"😊 여유있음"},
+  coupons:{dad:[],mom:[],child1:[],child2:[]},
+};
+let currentUser="dad", currentTab=0, currentSub=null;
+let calYear, calMonth, calSel=null;
+{ const d=new Date(); calYear=d.getFullYear(); calMonth=d.getMonth(); }
+
+/* ===== PERSISTENCE ===== */
+function loadState(){
+  try{const s=localStorage.getItem('fam-app-v4');if(s){const p=JSON.parse(s);Object.assign(S,p);}}catch(e){}
+}
+function saveState(){
+  try{localStorage.setItem('fam-app-v4',JSON.stringify(S));}catch(e){}
+}
+
+/* ===== CORE ACTIONS ===== */
+function toggleTodo(id){
+  const t=S.todos.find(x=>x.id===id);if(!t)return;
+  const done=!t.done; const pts=t.points||10;
+  if(done){
+    S.points[t.assignee]=(S.points[t.assignee]||0)+pts;
+    const ch=S.characters[t.assignee]||(S.characters[t.assignee]={level:1,exp:0,items:["🏠"]});
+    ch.exp+=pts;
+    if(ch.exp>=ch.level*100){ch.level++;ch.exp-=(ch.level-1)*100;ch.items.push(["🌸","⭐","🎀","🏅","🎯","💎"][Math.floor(Math.random()*6)]);}
+    S.feed.unshift({id:uid(),type:"done",user:t.assignee,text:t.text,points:pts,date:getToday(),time:new Date().toLocaleTimeString("ko",{hour:"2-digit",minute:"2-digit"}),reactions:{},comments:[]});
+  } else {
+    S.points[t.assignee]=Math.max(0,(S.points[t.assignee]||0)-pts);
+  }
+  t.done=done;
+  saveState(); render();
+}
+function deleteTodo(id){ S.todos=S.todos.filter(t=>t.id!==id); saveState(); render(); }
+function pokeTodo(id){
+  const t=S.todos.find(x=>x.id===id);if(!t)return;
+  t.poked=true;
+  S.feed.unshift({id:uid(),type:"poke",from:currentUser,to:t.assignee,text:t.text,date:getToday(),time:new Date().toLocaleTimeString("ko",{hour:"2-digit",minute:"2-digit"}),reactions:{},comments:[]});
+  saveState(); render();
+}
+function tossTodo(id){
+  const t=S.todos.find(x=>x.id===id);if(!t)return;
+  let html=`<h3 style="margin:0 0 12px;color:var(--text1)">🤝 대신 해줘요</h3>
+  <p style="font-size:13px;color:var(--text3);margin:0 0 16px">"${esc(t.text)}" 도움을 요청할 가족을 선택하세요</p>`;
+  FM.filter(m=>m.id!==t.assignee).forEach(m=>{
+    html+=`<button onclick="doToss('${id}','${m.id}')" style="display:block;width:100%;padding:12px 16px;background:${m.color}22;border:1px solid ${m.color}44;border-radius:14px;font-size:14px;cursor:pointer;margin-bottom:8px;font-family:inherit">${m.emoji} ${m.name}에게 부탁하기</button>`;
+  });
+  openModal(html);
+}
+function doToss(tid,mid){
+  const t=S.todos.find(x=>x.id===tid);if(!t)return;
+  S.feed.unshift({id:uid(),type:"toss",from:t.assignee,to:mid,text:t.text,date:getToday(),time:new Date().toLocaleTimeString("ko",{hour:"2-digit",minute:"2-digit"}),reactions:{},comments:[]});
+  t.tossedTo=mid; t.assignee=mid;
+  closeModal(); saveState(); render();
+}
+function openModal(html){document.getElementById('overlay').style.display='flex';document.getElementById('modalContent').innerHTML=html;}
+function closeModal(){document.getElementById('overlay').style.display='none';}
+
+/* ===== WEEK STATS ===== */
+function getWeekStats(){
+  const ws=new Date();ws.setDate(ws.getDate()-ws.getDay());
+  const wsStr=`${ws.getFullYear()}-${String(ws.getMonth()+1).padStart(2,'0')}-${String(ws.getDate()).padStart(2,'0')}`;
+  const wt=S.todos.filter(t=>t.date>=wsStr&&t.done);
+  return FM.map(m=>({name:m.name,emoji:m.emoji,color:m.color,
+    count:wt.filter(t=>t.assignee===m.id).length,
+    points:wt.filter(t=>t.assignee===m.id).reduce((s,t)=>s+(t.points||10),0)}));
+}
+
+/* ===== RENDER ===== */
+function render(){
+  renderUserBar(); renderTabBar();
+  const c=document.getElementById('contentArea');
+  if(currentTab===0) renderHome(c);
+  else if(currentTab===1&&!currentSub) renderTodos(c);
+  else if(currentTab===1&&currentSub==='grocery') renderGrocery(c);
+  else if(currentTab===1&&currentSub==='checklist') renderChecklist(c);
+  else if(currentTab===2) renderCalendar(c);
+  else if(currentTab===3&&!currentSub) renderQuest(c);
+  else if(currentTab===3&&currentSub==='shop') renderShop(c);
+  else if(currentTab===3&&currentSub==='roulette') renderRoulette(c);
+  else if(currentTab===4&&!currentSub) renderSocial(c);
+  else if(currentTab===4&&currentSub==='game') renderGame(c);
+}
+
+function renderUserBar(){
+  document.getElementById('userBar').innerHTML=FM.map(m=>
+    `<button class="${currentUser===m.id?'active':''}" onclick="currentUser='${m.id}';render()">
+      <span class="ub-emoji">${m.emoji}</span>
+      <span class="ub-name">${m.name}</span>
+    </button>`
+  ).join('');
+}
+function renderTabBar(){
+  document.getElementById('tabBar').innerHTML=TABS.map((t,i)=>
+    `<button class="${currentTab===i?'active':''}" onclick="currentTab=${i};currentSub=null;render()">
+      <span class="tb-icon">${t.icon}</span>
+      <span class="tb-label">${t.label}</span>
+    </button>`
+  ).join('');
+}
+
+/* ===== HOME ===== */
+function renderHome(el){
+  const todayT=S.todos.filter(t=>t.date===getToday()&&(!t.isPrivate||t.assignee===currentUser));
+  const doneC=todayT.filter(t=>t.done).length;
+  const pct=todayT.length?(doneC/todayT.length*100):0;
+  const events=(S.events||[]).filter(e=>new Date(e.date+'T00:00:00')>=new Date(getToday()+'T00:00:00')).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3);
+  const ws=getWeekStats();
+
+  let h=`<div class="fade-in">`;
+  // Status
+  h+=`<div class="status-row">
+    <span style="font-size:13px;color:var(--text3)">내 상태:</span>
+    <select onchange="S.statuses[currentUser]=this.value;saveState();render()" style="width:auto;padding:6px 10px;font-size:13px">
+      ${STATUSES.map(s=>`<option ${S.statuses[currentUser]===s?'selected':''}>${s}</option>`).join('')}
+    </select>
+  </div>`;
+  // Family Status
+  h+=`<div class="card"><div class="card-title">👨‍👩‍👧‍👦 가족 상태</div><div style="display:flex;gap:8px;flex-wrap:wrap">`;
+  FM.forEach(m=>{h+=`<div class="status-chip" style="border-color:${m.color}66"><span>${m.emoji}</span><span style="font-size:11px">${(S.statuses[m.id]||'😊 여유있음').split(' ')[0]}</span></div>`;});
+  h+=`</div></div>`;
+  // D-Day
+  if(events.length){
+    h+=`<div class="card"><div class="card-title">🎯 다가오는 이벤트</div>`;
+    events.forEach(ev=>{h+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5efe8"><span class="dday-badge">${ddayCalc(ev.date)}</span><span style="flex:1;font-size:14px">${esc(ev.title)}</span><span style="font-size:11px;color:var(--text5)">${fmtDate(ev.date)}</span></div>`;});
+    h+=`</div>`;
+  }
+  // Today
+  h+=`<div class="card"><div class="card-title">📋 오늘의 할일</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:12px;color:#a08060">${doneC}/${todayT.length}</span>
+    </div>`;
+  todayT.slice(0,5).forEach(t=>{
+    const m=gM(t.assignee);
+    h+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #f5efe8">
+      <button class="check-btn ${t.done?'checked':''}" onclick="toggleTodo('${t.id}')">${t.done?'✓':''}</button>
+      <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:var(--text5)':''}">${t.questMode?(QUEST_NAMES[t.category]||esc(t.text)):esc(t.text)}</span>
+      <span style="font-size:16px">${m.emoji}</span>
+    </div>`;
+  });
+  h+=`</div>`;
+  // Chart
+  h+=`<div class="card"><div class="card-title">📊 이번 주 기여도</div><canvas id="weekChart" height="160"></canvas></div>`;
+  h+=`</div>`;
+  el.innerHTML=h;
+  // Draw chart
+  setTimeout(()=>{
+    const ctx=document.getElementById('weekChart');
+    if(!ctx)return;
+    new Chart(ctx,{type:'bar',data:{labels:ws.map(s=>s.name),datasets:[{data:ws.map(s=>s.points),backgroundColor:ws.map(s=>s.color),borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>i.raw+'점'}}},scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:12}}}}}});
+  },50);
+}
+
+/* ===== TODO TAB ===== */
+let todoFilter='all', showAddTodo=false;
+let todoForm={text:'',assignee:'dad',category:'house',date:'',time:'',points:10,isPrivate:false,questMode:false};
+
+function renderTodos(el){
+  todoForm.assignee=currentUser; todoForm.date=todoForm.date||getToday();
+  const vis=S.todos.filter(t=>{
+    if(t.isPrivate&&t.assignee!==currentUser)return false;
+    if(todoFilter==='mine')return t.assignee===currentUser;
+    if(todoFilter==='today')return t.date===getToday();
+    return true;
+  });
+  const grouped={};vis.forEach(t=>{if(!grouped[t.date])grouped[t.date]=[];grouped[t.date].push(t);});
+
+  let h=`<div class="fade-in">`;
+  // Filters
+  h+=`<div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">`;
+  [['all','전체'],['mine','내 할일'],['today','오늘']].forEach(([k,v])=>{
+    h+=`<button class="filter-chip" style="background:${todoFilter===k?'var(--accent)':'#f5efe8'};color:${todoFilter===k?'#fff':'var(--text3)'}" onclick="todoFilter='${k}';render()">${v}</button>`;
+  });
+  h+=`<div style="margin-left:auto;display:flex;gap:4px">
+    <button class="filter-chip" style="background:#CAFFBF;color:#4a6b3a" onclick="currentSub='grocery';render()">🛒 장보기</button>
+    <button class="filter-chip" style="background:#FFC6FF;color:#6b3a6b" onclick="currentSub='checklist';render()">🎒 준비물</button>
+  </div></div>`;
+  // Add button
+  h+=`<button class="btn-add" onclick="showAddTodo=!showAddTodo;render()">${showAddTodo?'✕ 닫기':'＋ 할일 추가'}</button>`;
+  // Add form
+  if(showAddTodo){
+    h+=`<div class="card">
+      <div style="display:flex;gap:6px">
+        <input type="text" id="todoText" value="${esc(todoForm.text)}" placeholder="할일 입력 (또는 🎤 음성)" oninput="todoForm.text=this.value" onkeydown="if(event.key==='Enter')addTodoSubmit()" style="flex:1">
+        <button onclick="startVoice()" id="voiceBtn" style="width:40px;height:40px;border-radius:12px;border:none;font-size:18px;cursor:pointer;background:#f5efe8;flex-shrink:0;display:flex;align-items:center;justify-content:center">🎤</button>
+      </div>
+      <div class="form-row"><label class="form-label">담당</label><div class="chip-row">${FM.map(m=>`<button class="chip ${todoForm.assignee===m.id?'active':''}" style="${todoForm.assignee===m.id?`background:${m.color};color:#fff`:''}" onclick="todoForm.assignee='${m.id}';render()">${m.emoji} ${m.name}</button>`).join('')}</div></div>
+      <div class="form-row"><label class="form-label">카테고리</label><div class="chip-row">${CATS.map(c=>`<button class="chip ${todoForm.category===c.id?'active':''}" style="${todoForm.category===c.id?`background:${c.color};font-weight:700`:''}" onclick="todoForm.category='${c.id}';render()">${c.emoji} ${c.name}</button>`).join('')}</div></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <div style="flex:1"><label class="form-label">날짜</label><input type="date" value="${todoForm.date}" onchange="todoForm.date=this.value"></div>
+        <div style="flex:1"><label class="form-label">시간</label><input type="time" value="${todoForm.time}" onchange="todoForm.time=this.value"></div>
+        <div style="width:80px"><label class="form-label">포인트</label><input type="number" value="${todoForm.points}" min="5" step="5" onchange="todoForm.points=parseInt(this.value)||10"></div>
+      </div>
+      <div class="form-row"><label class="form-label">빠른 선택</label><div style="display:flex;flex-wrap:wrap;gap:4px">${PRESETS.map(p=>`<button class="chip" style="font-size:11px;padding:4px 8px;background:#FFF8F0;border:1px solid var(--border)" onclick="todoForm.text='${p.text}';todoForm.points=${p.points};todoForm.category='${p.cat}';render()">${p.text} (${p.points}p)</button>`).join('')}</div></div>
+      <div style="display:flex;gap:12px;margin-top:12px">
+        <label style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" ${todoForm.isPrivate?'checked':''} onchange="todoForm.isPrivate=this.checked"> 🔒 나만 보기</label>
+        <label style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" ${todoForm.questMode?'checked':''} onchange="todoForm.questMode=this.checked"> ⚔️ 퀘스트</label>
+      </div>
+      <button class="btn-submit" onclick="addTodoSubmit()">추가하기 ✨</button>
+    </div>`;
+  }
+  // Todo list
+  if(!vis.length){
+    h+=`<div class="empty"><div class="empty-icon">📝</div><p class="empty-text">할일이 없어요!</p></div>`;
+  } else {
+    Object.keys(grouped).sort().forEach(date=>{
+      h+=`<div class="date-header">${date===getToday()?'📌 오늘':fmtDate(date)}</div>`;
+      grouped[date].forEach(t=>{
+        const m=gM(t.assignee),c=gC(t.category);
+        h+=`<div class="todo-row ${t.done?'done':''} ${t.poked?'poked':''}">
+          <button class="check-btn ${t.done?'checked':''}" onclick="toggleTodo('${t.id}')">${t.done?'✓':''}</button>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:3px">
+              ${t.questMode?'<span style="font-size:11px">⚔️</span>':''}
+              ${t.isPrivate?'<span style="font-size:11px">🔒</span>':''}
+              <span style="font-size:13px;font-weight:500;${t.done?'text-decoration:line-through;color:var(--text5)':''}">${t.questMode?(QUEST_NAMES[t.category]||esc(t.text)):esc(t.text)}</span>
+            </div>
+            ${t.questMode?`<div style="font-size:10px;color:var(--text4)">원래: ${esc(t.text)}</div>`:''}
+            <div style="display:flex;gap:3px;margin-top:3px;flex-wrap:wrap">
+              <span class="tag" style="background:${m.color}33;color:${m.color}">${m.emoji}${m.name}</span>
+              <span class="tag" style="background:${c.color}88">${c.emoji}${c.name}</span>
+              <span class="tag" style="background:#FFF3E0;color:var(--accent)">⭐${t.points||10}p</span>
+              ${t.time?`<span class="tag" style="background:#E8F4FD;color:#5B8FB9">⏰${t.time}</span>`:''}
+              ${t.tossedTo?`<span class="tag" style="background:#FFE0E0">🤝 토스</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+            ${!t.done&&t.assignee!==currentUser?`<button class="act-btn" onclick="pokeTodo('${t.id}')" title="콕 찌르기">👉</button>`:''}
+            ${!t.done&&t.assignee===currentUser?`<button class="act-btn" onclick="tossTodo('${t.id}')" title="대신 해줘요">🤝</button>`:''}
+            <button class="act-btn" style="color:#dcc8b4" onclick="deleteTodo('${t.id}')">×</button>
+          </div>
+        </div>`;
+      });
+    });
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+
+function addTodoSubmit(){
+  if(!todoForm.text.trim())return;
+  const todo={id:uid(),...todoForm,done:false,createdAt:Date.now(),reactions:{},comments:[],poked:false,tossedTo:null};
+  S.todos.unshift(todo);
+  if(todoForm.category==='grocery') S.groceries.unshift({id:uid(),text:todoForm.text,done:false,addedBy:todoForm.assignee});
+  todoForm={text:'',assignee:currentUser,category:'house',date:getToday(),time:'',points:10,isPrivate:false,questMode:false};
+  showAddTodo=false;
+  saveState(); render();
+}
+
+function startVoice(){
+  try{
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){alert('이 브라우저에서 음성 입력을 지원하지 않아요.');return;}
+    const r=new SR();r.lang='ko-KR';r.continuous=false;
+    const btn=document.getElementById('voiceBtn');
+    btn.style.background='#ff6b6b';btn.textContent='🔴';
+    r.onresult=(e)=>{todoForm.text+=(todoForm.text?' ':'')+e.results[0][0].transcript;render();};
+    r.onend=()=>{if(btn){btn.style.background='#f5efe8';btn.textContent='🎤';}};
+    r.onerror=()=>{if(btn){btn.style.background='#f5efe8';btn.textContent='🎤';}};
+    r.start();
+  }catch(e){alert('음성 입력 오류');}
+}
+
+/* ===== GROCERY ===== */
+function renderGrocery(el){
+  let h=`<div class="fade-in">
+    <button class="btn-back" onclick="currentSub=null;render()">← 돌아가기</button>
+    <h2 class="pg-title">🛒 장보기 목록</h2>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <input type="text" id="groceryInput" placeholder="장볼 항목 추가" style="flex:1" onkeydown="if(event.key==='Enter')addGrocery()">
+      <button class="btn-submit" style="width:auto;margin-top:0;padding:10px 16px" onclick="addGrocery()">추가</button>
+    </div>`;
+  if(!(S.groceries||[]).length){
+    h+=`<div class="empty"><div class="empty-icon">🛒</div><p class="empty-text">장볼 것이 없어요!</p></div>`;
+  } else {
+    (S.groceries||[]).forEach(g=>{
+      h+=`<div class="todo-row ${g.done?'done':''}">
+        <button class="check-btn ${g.done?'checked':''}" onclick="S.groceries.find(x=>x.id==='${g.id}').done=!S.groceries.find(x=>x.id==='${g.id}').done;saveState();render()">${g.done?'✓':''}</button>
+        <span style="flex:1;font-size:14px;${g.done?'text-decoration:line-through;color:var(--text5)':''}">${esc(g.text)}</span>
+        <span style="font-size:11px;color:var(--text5)">${gM(g.addedBy).emoji}</span>
+        <button class="act-btn" style="color:#dcc8b4" onclick="S.groceries=S.groceries.filter(x=>x.id!=='${g.id}');saveState();render()">×</button>
+      </div>`;
+    });
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+function addGrocery(){
+  const inp=document.getElementById('groceryInput');if(!inp||!inp.value.trim())return;
+  S.groceries.unshift({id:uid(),text:inp.value.trim(),done:false,addedBy:currentUser});
+  saveState();render();
+}
+
+/* ===== CHECKLIST ===== */
+let checkAssignee='child2',checkDue='';
+function renderChecklist(el){
+  checkDue=checkDue||getToday();
+  const items=S.todos.filter(t=>t.category==='prep');
+  let h=`<div class="fade-in">
+    <button class="btn-back" onclick="currentSub=null;render()">← 돌아가기</button>
+    <h2 class="pg-title">🎒 준비물 체크리스트</h2>
+    <div class="card">
+      <input type="text" id="checkInput" placeholder="예: 실내화, 받아쓰기 공책, 수행평가 제출" onkeydown="if(event.key==='Enter')addCheckItem()">
+      <div style="display:flex;gap:6px;margin-top:8px">${FM.filter(m=>m.role!=='parent').map(m=>`<button class="chip ${checkAssignee===m.id?'active':''}" style="${checkAssignee===m.id?`background:${m.color};color:#fff`:''}" onclick="checkAssignee='${m.id}';render()">${m.emoji} ${m.name}</button>`).join('')}</div>
+      <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+        <input type="date" value="${checkDue}" onchange="checkDue=this.value" style="flex:1">
+        <button class="btn-submit" style="margin-top:0;flex:1" onclick="addCheckItem()">추가 ✨</button>
+      </div>
+    </div>`;
+  if(!items.length){
+    h+=`<p style="text-align:center;color:var(--text4);padding:24px">준비물이 없어요 ✅</p>`;
+  } else {
+    items.forEach(t=>{
+      const m=gM(t.assignee);
+      h+=`<div class="todo-row ${t.done?'done':''}">
+        <button class="check-btn ${t.done?'checked':''}" onclick="S.todos.find(x=>x.id==='${t.id}').done=!S.todos.find(x=>x.id==='${t.id}').done;saveState();render()">${t.done?'✓':''}</button>
+        <div style="flex:1"><span style="font-size:14px;${t.done?'text-decoration:line-through;color:var(--text5)':''}">${esc(t.text)}</span><div style="font-size:11px;color:var(--text5);margin-top:2px">${m.emoji} ${m.name} · ${ddayCalc(t.date)}</div></div>
+      </div>`;
+    });
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+function addCheckItem(){
+  const inp=document.getElementById('checkInput');if(!inp||!inp.value.trim())return;
+  S.todos.unshift({id:uid(),text:inp.value.trim(),assignee:checkAssignee,category:'prep',date:checkDue,time:'',points:15,done:false,isPrivate:false,questMode:false,createdAt:Date.now(),reactions:{},comments:[],poked:false,tossedTo:null});
+  saveState();render();
+}
+
+/* ===== CALENDAR ===== */
+let showEventForm=false;
+function renderCalendar(el){
+  const dim=new Date(calYear,calMonth+1,0).getDate();
+  const fd=new Date(calYear,calMonth,1).getDay();
+  const events=(S.events||[]).sort((a,b)=>a.date.localeCompare(b.date));
+
+  let h=`<div class="fade-in">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="cal-nav">
+        <button onclick="calMonth--;if(calMonth<0){calYear--;calMonth=11;}render()">◀</button>
+        <span>${calYear}년 ${calMonth+1}월</span>
+        <button onclick="calMonth++;if(calMonth>11){calYear++;calMonth=0;}render()">▶</button>
+      </div>
+      <button class="filter-chip" style="background:#FFE8D6;color:#c47030" onclick="showEventForm=!showEventForm;render()">${showEventForm?'✕':'🎯 행사'}</button>
+    </div>`;
+  // Event form
+  if(showEventForm){
+    h+=`<div class="card" style="margin-bottom:12px">
+      <input type="text" id="evTitle" placeholder="행사명 (예: 엄마 생일, 가족여행)">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="date" id="evDate" value="${getToday()}" style="flex:1">
+        <button class="btn-submit" style="margin-top:0;flex:1" onclick="addEvent()">추가 🎯</button>
+      </div>
+    </div>`;
+  }
+  // Event strip
+  if(events.length){
+    h+=`<div class="event-strip">`;
+    events.slice(0,5).forEach(ev=>{
+      h+=`<div class="event-chip"><span style="font-size:11px;font-weight:700;color:var(--accent)">${ddayCalc(ev.date)}</span><div style="font-size:12px;white-space:nowrap">${esc(ev.title)}</div></div>`;
+    });
+    h+=`</div>`;
+  }
+  // Calendar grid
+  h+=`<div class="cal-week">${["일","월","화","수","목","금","토"].map(d=>`<div>${d}</div>`).join('')}</div>`;
+  h+=`<div class="cal-grid">`;
+  for(let i=0;i<fd;i++) h+=`<div class="cal-cell"></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dt=S.todos.filter(t=>t.date===ds&&(!t.isPrivate||t.assignee===currentUser));
+    const de=(S.events||[]).filter(e=>e.date===ds);
+    const isT=ds===getToday();const isSel=calSel===ds;
+    h+=`<div class="cal-cell ${isT?'today':''} ${isSel?'selected':''}" onclick="calSel=calSel==='${ds}'?null:'${ds}';render()">
+      <span class="cal-day">${d}</span>
+      ${de.length?'<div class="cal-dot" style="width:5px;height:5px;border-radius:3px;background:var(--danger);margin-top:1px"></div>':''}
+      ${dt.length?`<div class="cal-dots">${dt.slice(0,3).map(t=>`<div class="cal-dot" style="background:${gM(t.assignee).color}"></div>`).join('')}</div>`:''}
+    </div>`;
+  }
+  h+=`</div>`;
+  // Selected day details
+  if(calSel){
+    const day=parseInt(calSel.split('-')[2]);
+    const dt=S.todos.filter(t=>t.date===calSel&&(!t.isPrivate||t.assignee===currentUser));
+    const de=(S.events||[]).filter(e=>e.date===calSel);
+    h+=`<div style="margin-top:12px"><div class="date-header">${fmtDate(calSel)}</div>`;
+    de.forEach(ev=>{h+=`<div class="card" style="margin-bottom:8px;border-left:4px solid var(--danger);padding:12px"><div style="font-weight:700;color:var(--accent)">${esc(ev.title)}</div><span style="font-size:11px;color:var(--text5)">${ddayCalc(ev.date)}</span></div>`;});
+    if(!dt.length&&!de.length) h+=`<p style="text-align:center;color:var(--text4);padding:16px">일정이 없어요 🎉</p>`;
+    dt.forEach(t=>{
+      const m=gM(t.assignee);
+      h+=`<div class="todo-row ${t.done?'done':''}">
+        <button class="check-btn ${t.done?'checked':''}" onclick="toggleTodo('${t.id}')">${t.done?'✓':''}</button>
+        <span style="flex:1;font-size:13px;${t.done?'text-decoration:line-through;color:var(--text5)':''}">${esc(t.text)}</span>
+        ${t.time?`<span style="font-size:11px;color:#5B8FB9">⏰${t.time}</span>`:''}
+        <span style="font-size:16px">${m.emoji}</span>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+function addEvent(){
+  const t=document.getElementById('evTitle'),d=document.getElementById('evDate');
+  if(!t||!t.value.trim())return;
+  S.events.push({id:uid(),title:t.value.trim(),date:d.value||getToday()});
+  showEventForm=false; saveState(); render();
+}
+
+/* ===== QUEST ===== */
+function renderQuest(el){
+  const ch=S.characters[currentUser]||{level:1,exp:0,items:["🏠"]};
+  const m=gM(currentUser);
+  const expN=ch.level*100;
+  const ws=getWeekStats();
+
+  let h=`<div class="fade-in">
+    <div class="char-card" style="background:linear-gradient(135deg,${m.color}11,${m.color}22)">
+      <div style="font-size:56px">${m.emoji}</div>
+      <div style="font-size:18px;font-weight:800;margin-top:4px">${m.name}</div>
+      <div style="font-size:14px;color:${m.color};font-weight:700">Lv.${ch.level} 모험가</div>
+      <div style="margin:8px auto;width:80%">
+        <div class="exp-bar"><div class="exp-fill" style="width:${(ch.exp/expN)*100}%;background:${m.color}"></div></div>
+        <div style="font-size:11px;color:var(--text4);margin-top:2px">EXP ${ch.exp}/${expN}</div>
+      </div>
+      <div style="display:flex;justify-content:center;gap:4px;flex-wrap:wrap;margin-top:8px">
+        ${(ch.items||[]).map(i=>`<span style="font-size:20px">${i}</span>`).join('')}
+      </div>
+      <div style="font-size:12px;color:var(--text4);margin-top:8px">할일을 완료하면 EXP와 아이템을 획득해요!</div>
+    </div>
+    <div class="card"><div class="card-title">⭐ 포인트 현황</div>
+      <div class="point-grid">${FM.map(f=>`<div class="point-box" style="background:${f.id===currentUser?f.color+'15':'#FAFAFA'}">
+        <span style="font-size:28px">${f.emoji}</span>
+        <div style="font-size:22px;font-weight:800;color:${f.color};margin:4px 0">${S.points[f.id]||0}</div>
+        <div style="font-size:11px;color:var(--text4)">${f.name}</div>
+      </div>`).join('')}</div>
+    </div>
+    <div class="card"><div class="card-title">📊 이번 주 기여도</div><canvas id="pieChart" height="180"></canvas></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="big-btn" onclick="currentSub='shop';render()"><span style="font-size:28px">🏪</span><span style="font-size:13px;font-weight:600">쿠폰 상점</span></button>
+      <button class="big-btn" onclick="currentSub='roulette';render()"><span style="font-size:28px">🎰</span><span style="font-size:13px;font-weight:600">랜덤 룰렛</span></button>
+    </div>
+  </div>`;
+  el.innerHTML=h;
+  setTimeout(()=>{
+    const ctx=document.getElementById('pieChart');if(!ctx)return;
+    const filtered=ws.filter(s=>s.points>0);
+    if(!filtered.length)return;
+    new Chart(ctx,{type:'doughnut',data:{labels:filtered.map(s=>s.name),datasets:[{data:filtered.map(s=>s.points),backgroundColor:filtered.map(s=>s.color),borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:12}}},tooltip:{callbacks:{label:i=>i.label+' '+i.raw+'점'}}}}});
+  },50);
+}
+
+/* ===== SHOP ===== */
+function renderShop(el){
+  const pts=S.points[currentUser]||0;
+  const myC=(S.coupons||{})[currentUser]||[];
+  let h=`<div class="fade-in">
+    <button class="btn-back" onclick="currentSub=null;render()">← 돌아가기</button>
+    <h2 class="pg-title">🏪 쿠폰 상점</h2>
+    <div style="text-align:center;padding:12px;background:linear-gradient(135deg,#FFF3E0,#FFE8D6);border-radius:16px;margin-bottom:16px">
+      <div style="font-size:13px;color:#a08060">내 포인트</div>
+      <div style="font-size:32px;font-weight:800;color:var(--accent)">⭐ ${pts}</div>
+    </div>
+    <div class="shop-grid">${SHOP.map(item=>`<div class="card shop-card">
+      <div class="shop-emoji">${item.emoji}</div>
+      <div class="shop-name">${item.name}</div>
+      <button class="btn-submit" style="margin-top:4px;padding:8px 12px;font-size:12px;${pts<item.cost?'opacity:.4':''}" onclick="buyItem('${item.id}')" ${pts<item.cost?'disabled':''}>⭐ ${item.cost}p</button>
+    </div>`).join('')}</div>`;
+  if(myC.length){
+    h+=`<div style="margin-top:20px"><div class="card-title">🎟️ 내 쿠폰</div>`;
+    myC.forEach((c,i)=>{
+      h+=`<div class="todo-row" style="background:${c.used?'#f5f5f5':'#FFFBF7'}">
+        <span style="font-size:20px">${c.emoji}</span>
+        <span style="flex:1;font-size:13px;${c.used?'color:var(--text5);text-decoration:line-through':''}">${esc(c.name)}</span>
+        ${!c.used?`<button class="filter-chip" style="background:var(--success);color:#fff" onclick="useCoupon(${i})">사용</button>`:''}
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+function buyItem(sid){
+  const item=SHOP.find(s=>s.id===sid);if(!item)return;
+  if((S.points[currentUser]||0)<item.cost){alert('포인트가 부족해요!');return;}
+  S.points[currentUser]-=item.cost;
+  if(!S.coupons)S.coupons={dad:[],mom:[],child1:[],child2:[]};
+  if(!S.coupons[currentUser])S.coupons[currentUser]=[];
+  S.coupons[currentUser].push({...item,boughtAt:Date.now(),used:false});
+  saveState();render();
+}
+function useCoupon(i){
+  if(!S.coupons||!S.coupons[currentUser])return;
+  S.coupons[currentUser][i].used=true;
+  saveState();render();
+}
+
+/* ===== ROULETTE ===== */
+let rouletteAngle=0,rouletteSpinning=false,rouletteResult=null;
+function renderRoulette(el){
+  let h=`<div class="fade-in">
+    <button class="btn-back" onclick="currentSub=null;render()">← 돌아가기</button>
+    <h2 class="pg-title">🎰 오늘의 랜덤 룰렛</h2>
+    <p style="text-align:center;color:var(--text3);font-size:13px;margin-bottom:20px">누가 할지 애매할 때 룰렛을 돌려보세요!</p>
+    <div class="roulette-wrap">
+      <div class="roulette-outer">
+        <div class="roulette-arrow">▼</div>
+        <div class="roulette-wheel" id="rouletteWheel" style="transform:rotate(${rouletteAngle}deg)">
+          ${FM.map(m=>`<div class="roulette-cell" style="background:${m.color}44">${m.emoji}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <button class="btn-submit" style="width:auto;padding:14px 40px;font-size:16px;${rouletteSpinning?'opacity:.6':''}" onclick="spinRoulette()" ${rouletteSpinning?'disabled':''}>${rouletteSpinning?'돌리는 중... 🌀':'룰렛 돌리기! 🎯'}</button>
+      ${rouletteResult?`<div style="margin-top:20px;padding:20px;background:${rouletteResult.color}15;border-radius:20px;text-align:center">
+        <div style="font-size:56px">${rouletteResult.emoji}</div>
+        <div style="font-size:20px;font-weight:800;color:${rouletteResult.color};margin-top:8px">🎉 ${rouletteResult.name} 당첨!</div>
+      </div>`:''}
+    </div>
+  </div>`;
+  el.innerHTML=h;
+}
+function spinRoulette(){
+  if(rouletteSpinning)return;
+  rouletteSpinning=true;rouletteResult=null;render();
+  const idx=Math.floor(Math.random()*FM.length);
+  rouletteAngle+=1440+(idx*90)+Math.random()*30;
+  const wheel=document.getElementById('rouletteWheel');
+  if(wheel)wheel.style.transform=`rotate(${rouletteAngle}deg)`;
+  setTimeout(()=>{rouletteResult=FM[idx];rouletteSpinning=false;render();},3100);
+}
+
+/* ===== SOCIAL ===== */
+let showMsgForm=false, msgTo='mom', msgText='';
+function renderSocial(el){
+  let h=`<div class="fade-in">
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button class="btn-add" style="flex:1;margin-bottom:0" onclick="showMsgForm=!showMsgForm;render()">${showMsgForm?'✕ 닫기':'💌 한마디 남기기'}</button>
+      <button class="filter-chip" style="background:#BDB2FF;color:#4a3f6b;padding:10px 14px;font-size:13px" onclick="currentSub='game';render()">🎮 게임</button>
+    </div>`;
+  if(showMsgForm){
+    h+=`<div class="card" style="margin-bottom:12px">
+      <div class="form-row"><label class="form-label">받는 사람</label><div class="chip-row">${FM.filter(m=>m.id!==currentUser).map(m=>`<button class="chip ${msgTo===m.id?'active':''}" style="${msgTo===m.id?`background:${m.color};color:#fff`:''}" onclick="msgTo='${m.id}';render()">${m.emoji} ${m.name}</button>`).join('')}</div></div>
+      <textarea id="msgInput" rows="3" placeholder="따뜻한 한마디를 남겨보세요 💕" style="margin-top:8px">${esc(msgText)}</textarea>
+      <button class="btn-submit" onclick="sendMessage()">보내기 💕</button>
+    </div>`;
+  }
+  if(!(S.feed||[]).length){
+    h+=`<div class="empty"><div class="empty-icon">💬</div><p class="empty-text">아직 소식이 없어요</p></div>`;
+  } else {
+    (S.feed||[]).slice(0,30).forEach(f=>{
+      const from=gM(f.from||f.user);const to=f.to?gM(f.to):null;
+      const icon=f.type==='done'?'✅':f.type==='poke'?'👉':f.type==='toss'?'🤝':'💌';
+      let msg='';
+      if(f.type==='done') msg=`<b style="color:${from.color}">${from.name}</b>님이 "${esc(f.text)}" 완료! (+${f.points}p)`;
+      else if(f.type==='poke') msg=`<b style="color:${from.color}">${from.name}</b>님이 <b style="color:${to?.color}">${to?.name}</b>님에게 콕! "${esc(f.text)}"`;
+      else if(f.type==='toss') msg=`<b style="color:${from.color}">${from.name}</b> → <b style="color:${to?.color}">${to?.name}</b> 대신 해줘요: "${esc(f.text)}"`;
+      else msg=`<b style="color:${from.color}">${from.name}</b> → <b style="color:${to?.color}">${to?.name}</b>: ${esc(f.text)}`;
+
+      h+=`<div class="feed-card">
+        <div style="display:flex;gap:8px">
+          <span style="font-size:22px">${from.emoji}</span>
+          <div style="flex:1"><div style="font-size:13px;line-height:1.6">${icon} ${msg}</div><div style="font-size:11px;color:var(--text5);margin-top:2px">${f.time||''} · ${fmtDate(f.date)}</div></div>
+        </div>
+        <div class="reaction-row">
+          ${REACTS.map(r=>{
+            const cnt=Object.values(f.reactions||{}).filter(v=>v===r).length;
+            const mine=(f.reactions||{})[currentUser]===r;
+            return `<button class="reaction-btn ${mine?'active':''}" onclick="reactFeed('${f.id}','${r}')">${r}${cnt?`<span style="font-size:10px;margin-left:2px">${cnt}</span>`:''}</button>`;
+          }).join('')}
+          <button class="reaction-btn" onclick="toggleComment('${f.id}')">💬</button>
+        </div>
+        ${(f.comments||[]).length?`<div class="comment-list">${(f.comments||[]).map(c=>`<div class="comment-item">${gM(c.user).emoji} ${esc(c.text)} <span style="color:#ccc">${c.time||''}</span></div>`).join('')}</div>`:''}
+        <div id="cmt-${f.id}" style="display:none;margin-top:6px">
+          <div style="display:flex;gap:6px">
+            <input type="text" id="cmtInput-${f.id}" placeholder="댓글..." style="flex:1;padding:6px 10px;font-size:12px" onkeydown="if(event.key==='Enter')submitComment('${f.id}')">
+            <button class="filter-chip" style="background:var(--accent);color:#fff" onclick="submitComment('${f.id}')">전송</button>
+          </div>
+        </div>
+      </div>`;
+    });
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+function sendMessage(){
+  const inp=document.getElementById('msgInput');if(!inp||!inp.value.trim())return;
+  S.feed.unshift({id:uid(),type:'msg',from:currentUser,to:msgTo,text:inp.value.trim(),date:getToday(),time:new Date().toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'}),reactions:{},comments:[]});
+  msgText='';showMsgForm=false;saveState();render();
+}
+function reactFeed(fid,emoji){
+  const f=S.feed.find(x=>x.id===fid);if(!f)return;
+  if(!f.reactions)f.reactions={};
+  if(f.reactions[currentUser]===emoji)delete f.reactions[currentUser];else f.reactions[currentUser]=emoji;
+  saveState();render();
+}
+function toggleComment(fid){
+  const el=document.getElementById('cmt-'+fid);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
+function submitComment(fid){
+  const inp=document.getElementById('cmtInput-'+fid);if(!inp||!inp.value.trim())return;
+  const f=S.feed.find(x=>x.id===fid);if(!f)return;
+  if(!f.comments)f.comments=[];
+  f.comments.push({user:currentUser,text:inp.value.trim(),time:new Date().toLocaleTimeString('ko',{hour:'2-digit',minute:'2-digit'})});
+  saveState();render();
+}
+
+/* ===== GAME ===== */
+let gameBoard=Array(9).fill(null),gameTurn=0,gameWinner=null;
+const gamePlayers=[FM[0],FM[2]];
+function renderGame(el){
+  const cp=gamePlayers[gameTurn%2];
+  let h=`<div class="fade-in">
+    <button class="btn-back" onclick="currentSub=null;render()">← 돌아가기</button>
+    <h2 class="pg-title">🎮 틱택토</h2>
+    <p style="text-align:center;color:var(--text3);font-size:13px">${gameWinner||`${cp.emoji} ${cp.name} 차례`}</p>
+    <div class="game-grid">
+      ${gameBoard.map((v,i)=>`<button class="game-cell ${v?'filled':''}" onclick="playGame(${i})">${v||''}</button>`).join('')}
+    </div>
+    <div style="text-align:center;margin-top:12px">
+      <button class="filter-chip" style="background:#FFE8D6;color:#c47030;padding:10px 24px" onclick="resetGame()">다시 하기 🔄</button>
+    </div>
+  </div>`;
+  el.innerHTML=h;
+}
+function playGame(i){
+  if(gameBoard[i]||gameWinner)return;
+  gameBoard[i]=gamePlayers[gameTurn%2].emoji;
+  const w=checkGame(gameBoard);
+  if(w){gameWinner=w==='draw'?'무승부!':w+' 승리!';}else gameTurn++;
+  render();
+}
+function checkGame(b){
+  const l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for(const [a,c,d] of l) if(b[a]&&b[a]===b[c]&&b[a]===b[d]) return b[a];
+  return b.every(Boolean)?'draw':null;
+}
+function resetGame(){gameBoard=Array(9).fill(null);gameTurn=0;gameWinner=null;render();}
+
+/* ===== INIT ===== */
+loadState();
+render();
+</script>
+</body>
+</html>
