@@ -522,7 +522,7 @@ function renderHome(el){
   });
   h+=`</div>`;
   // Chart
-  h+=`<div class="card"><div class="card-title">📊 이번 주 기여도</div><canvas id="weekChart" height="160"></canvas></div>`;
+  h+=`<div class="card"><div class="card-title">📊 이번 주 기여도</div><div style="position:relative;height:180px"><canvas id="weekChart"></canvas></div></div>`;
   h+=`</div>`;
   el.innerHTML=h;
   // Draw chart
@@ -816,7 +816,7 @@ function renderQuest(el){
         <div style="font-size:11px;color:var(--text4)">${f.name}</div>
       </div>`).join('')}</div>
     </div>
-    <div class="card"><div class="card-title">📊 이번 주 기여도</div><canvas id="pieChart" height="180"></canvas></div>
+    <div class="card"><div class="card-title">📊 이번 주 기여도</div><div style="position:relative;height:220px"><canvas id="pieChart"></canvas></div></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <button class="big-btn" onclick="currentSub='shop';render()"><span style="font-size:28px">🏪</span><span style="font-size:13px;font-weight:600">쿠폰 상점</span></button>
       <button class="big-btn" onclick="currentSub='roulette';render()"><span style="font-size:28px">🎰</span><span style="font-size:13px;font-weight:600">랜덤 룰렛</span></button>
